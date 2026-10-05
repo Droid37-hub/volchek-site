@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Булочные Ф. Вольчека — Официальный сайт</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fff; color: #1a1a1a; min-height: 100vh; }
+        h1, h2, h3, .brand-font { font-family: 'Playfair Display', serif; }
+        
+        /* Стили для PDF и печати */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .hero-bg { height: 500px !important; -webkit-print-color-adjust: exact; }
+            section { page-break-inside: avoid; }
+            .cart-drawer { display: none !important; }
+        }
+
+        .hero-bg { 
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1517433670267-24bb31200931?q=80&w=2000');
+            background-size: cover; background-position: center;
+        }
+        
+        .active-filter { border-bottom: 2px solid #1a1a1a; color: #1a1a1a !important; }
+        
+        /* Исправление "открывается не полностью" - убираем жесткие ограничения высоты */
+        .main-wrapper { overflow: visible; position: relative; }
+        
+        .cart-drawer { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(100%); }
+        .cart-drawer.open { transform: translateX(0); }
+        
+        .logo-img { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+    </style>
+</head>
+<body class="main-wrapper">
+
+    <!-- КОРЗИНА -->
+    <div id="cartDrawer" class="fixed right-0 top-0 h-full w-full md:w-[400px] bg-white z-[100] shadow-2xl cart-drawer flex flex-col no-print">
+        <div class="p-6 border-b flex justify-between items-center bg-stone-50">
+            <h2 class="text-2xl brand-font italic">Ваш выбор</h2>
+            <button onclick="toggleCart()" class="text-3xl">&times;</button>
+        </div>
+        <div id="cartItems" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <p class="text-stone-400 text-center py-10 italic">Корзина пуста</p>
+        </div>
+        <div class="p-6 border-t">
+            <div class="flex justify-between text-xl mb-6 font-bold">
+                <span>Итого:</span>
+                <span id="cartTotal">0 ₽</span>
+            </div>
+            <button onclick="checkout()" class="w-full bg-black text-white py-4 font-bold uppercase tracking-widest hover:bg-stone-800">
+                Сформировать заказ
+            </button>
+        </div>
+    </div>
+
+    <!-- НАВИГАЦИЯ -->
+    <nav class="sticky top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-stone-100">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center space-x-6">
+                <!-- ВАШ ЛОГОТИП -->
+                <img src="https://fvolchek.ru/upload/iblock/611/v0on9bkyonv0rly02q5k7g8xsh09a0v5.png" alt="Вольчек" class="h-16 logo-img">
+                <div class="hidden sm:block">
+                    <span class="block font-bold text-xs uppercase tracking-[0.3em]">Ф. Вольчека</span>
+                    <span class="block text-[10px] text-stone-400 uppercase tracking-widest">Булочные №1</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-8">
+                <div class="hidden lg:flex space-x-8 text-[10px] font-bold uppercase tracking-widest">
+                    <a href="#catalog" class="hover:text-amber-900 transition">Ассортимент</a>
+                    <a href="#addresses" class="hover:text-amber-900 transition">Адреса</a>
+                </div>
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-stone-100 px-4 py-2 rounded-full hover:bg-amber-50 transition">
+                    <span id="cartTotalNav" class="text-xs font-bold">0 ₽</span>
+                    <span class="bg-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <header class="relative h-[80vh] flex items-center justify-center hero-bg text-white text-center">
+        <div class="max-w-4xl px-6">
+            <h1 class="text-5xl md:text-7xl mb-6 leading-tight font-serif">Всегда свежее. <br>Всегда ручной работы.</h1>
+            <p class="text-lg opacity-90 italic mb-10">Традиционная выпечка Петербурга с 2014 года</p>
+            <a href="#catalog" class="bg-white text-black px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-stone-200">В витрину</a>
+        </div>
+    </header>
+
+    <!-- ПРАВИЛА ЗАКАЗА -->
+    <section class="py-20 bg-stone-50 border-b">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="bg-white p-10 border-l-4 border-black shadow-sm">
+                <h2 class="text-3xl brand-font mb-6 italic">Как заказать к празднику?</h2>
+                <div class="grid md:grid-cols-2 gap-10 text-sm leading-relaxed text-stone-600">
+                    <p>• Оформите заказ у продавца в булочной <strong>не позднее 14:00</strong> накануне дня получения.</p>
+                    <p>• Оплатите заказ при получении. Вес изделий может отличаться на 10%, так как мы печем вручную.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- КАТАЛОГ -->
+    <section id="catalog" class="py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-wrap justify-center gap-6 mb-16 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 no-print">
+                <button onclick="filterCatalog('all')" class="catalog-filter active-filter">Все</button>
+                <button onclick="filterCatalog('confectionery')" class="catalog-filter">Кондитерские</button>
+                <button onclick="filterCatalog('bakery')" class="catalog-filter">Выпечка</button>
+                <button onclick="filterCatalog('bread')" class="catalog-filter">Хлеб</button>
+            </div>
+
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+                <!-- Товары рендерятся из JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- АДРЕСА -->
+    <section id="addresses" class="py-20 bg-stone-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+            <div>
+                <h2 class="text-4xl font-serif mb-6 italic">Булочная рядом</h2>
+                <p class="text-stone-400 mb-8">Более 150 адресов в Санкт-Петербурге. Найдите ближайшую на карте.</p>
+                <button class="border border-white/30 px-8 py-3 uppercase text-[10px] tracking-widest hover:bg-white hover:text-black transition">Открыть карту</button>
+            </div>
+            <div class="h-80 bg-stone-800 rounded overflow-hidden opacity-50 grayscale">
+                <iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3Ad5948332a688b5606d860d5b161350a80e439498a44b1c2b53589b251e707e8a&amp;source=constructor" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-12 text-center text-stone-400 text-[10px] uppercase tracking-widest">
+        © 2014 — 2024 Ф. Вольчек • Булочные Петербурга
+    </footer>
+
+    <script>
+        const products = [
+            { id: 1, cat: 'confectionery', name: 'Буше', price: 69, weight: '70 гр', img: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?q=80&w=400' },
+            { id: 2, cat: 'confectionery', name: 'Сметанник Фокина', price: 98, weight: '125 гр', img: 'https://images.unsplash.com/photo-1621236304845-8d132930a5ca?q=80&w=400' },
+            { id: 3, cat: 'bakery', name: 'Вензель с брусникой', price: 86, weight: '75 гр', img: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?q=80&w=400' },
+            { id: 4, cat: 'bakery', name: 'Круассан классик', price: 74, weight: '50 гр', img: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=400' },
+            { id: 5, cat: 'bread', name: 'Чиабатта', price: 36, weight: '200 гр', img: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?q=80&w=400' },
+            { id: 6, cat: 'bread', name: 'Багет французский', price: 44, weight: '250 гр', img: 'https://images.unsplash.com/photo-1597079910443-60c43fc4f729?q=80&w=400' },
+            { id: 7, cat: 'confectionery', name: 'Эклер заварной', price: 62, weight: '55 гр', img: 'https://images.unsplash.com/photo-1612203985729-70726954388c?q=80&w=400' },
+            { id: 8, cat: 'bakery', name: 'Пирог с капустой', price: 72, weight: '125 гр', img: 'https://images.unsplash.com/photo-1633531393892-a162234086b9?q=80&w=400' }
+        ];
+
+        let cart = [];
+
+        function renderProducts(filter = 'all') {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            const items = filter === 'all' ? products : products.filter(p => p.cat === filter);
+            
+            items.forEach(p => {
+                grid.innerHTML += `
+                    <div class="group border-b border-stone-100 pb-8">
+                        <div class="aspect-square overflow-hidden bg-stone-50 mb-6 rounded-sm">
+                            <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                        </div>
+                        <div class="flex justify-between items-baseline mb-2">
+                            <h3 class="text-xl font-serif italic">${p.name}</h3>
+                            <span class="font-bold text-sm">${p.price} ₽</span>
+                        </div>
+                        <p class="text-[10px] text-stone-400 mb-6 tracking-widest uppercase">${p.weight}</p>
+                        <button onclick="addToCart(${p.id})" class="w-full border border-black py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition no-print">
+                            В заказ +
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function filterCatalog(category) {
+            document.querySelectorAll('.catalog-filter').forEach(b => b.classList.remove('active-filter'));
+            event.target.classList.add('active-filter');
+            renderProducts(category);
+        }
+
+        function toggleCart() { document.getElementById('cartDrawer').classList.toggle('open'); }
+
+        function addToCart(id) {
+            const prod = products.find(p => p.id === id);
+            const inCart = cart.find(i => i.id === id);
+            inCart ? inCart.qty++ : cart.push({...prod, qty: 1});
+            updateUI();
+            if(!document.getElementById('cartDrawer').classList.contains('open')) toggleCart();
+        }
+
+        function updateUI() {
+            const cont = document.getElementById('cartItems');
+            const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            document.getElementById('cartCount').innerText = cart.reduce((s, i) => s + i.qty, 0);
+            document.getElementById('cartTotal').innerText = `${total} ₽`;
+            document.getElementById('cartTotalNav').innerText = `${total} ₽`;
+
+            if(cart.length === 0) {
+                cont.innerHTML = '<p class="text-stone-400 text-center py-10 italic">Корзина пуста</p>';
+                return;
+            }
+            cont.innerHTML = cart.map(i => `
+                <div class="flex justify-between items-center border-b pb-4">
+                    <div>
+                        <p class="font-serif italic text-lg">${i.name}</p>
+                        <p class="text-xs text-stone-400">${i.price} ₽ × ${i.qty}</p>
+                    </div>
+                    <button onclick="removeFromCart(${i.id})" class="text-stone-300 hover:text-red-500">Удалить</button>
+                </div>
+            `).join('');
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(i => i.id !== id);
+            updateUI();
+        }
+
+        function checkout() {
+            if(cart.length === 0) return alert("Выберите товары");
+            let msg = "ВАШ ПРЕДЗАКАЗ:\n\n";
+            cart.forEach(i => msg += `• ${i.name} — ${i.qty} шт.\n`);
+            msg += `\nИТОГО: ${document.getElementById('cartTotal').innerText}`;
+            msg += "\n\nПокажите этот список в булочной до 14:00.";
+            alert(msg);
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
